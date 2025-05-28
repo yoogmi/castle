@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>성 방어 게임</title>
   <style>
     body {
@@ -126,9 +126,10 @@
   </style>
 </head>
 <body>
+
   <!-- 🎬 인트로 영상 -->
   <video id="intro-video" autoplay muted>
-    <source src="video/intro.mp4" type="video/mp4" />
+    <source src="video/intro.mp4" type="video/mp4">
     브라우저가 영상을 지원하지 않습니다.
   </video>
 
@@ -151,13 +152,11 @@
     </div>
   </div>
 
-  <!-- 🔊 오디오 -->
-  <audio id="bgm" src="audio/bgm.mp3" loop></audio>
+  <audio id="bgm" src="audio/bgm.mp3" loop autoplay></audio>
 
   <script>
     const video = document.getElementById('intro-video');
     const gameContainer = document.getElementById('game-container');
-    const bgm = document.getElementById('bgm');
     const player = document.getElementById('player');
     const healthBar = document.getElementById('health');
     const timeDisplay = document.getElementById('time');
@@ -173,6 +172,7 @@
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
+    // ⏱ 영상 종료 후 게임 화면으로 전환
     video.onended = () => {
       video.style.display = 'none';
       gameContainer.style.display = 'block';
@@ -185,7 +185,6 @@
     document.addEventListener('keyup', e => { keys[e.key] = false; });
 
     startButton.onclick = () => {
-      bgm.play(); // 사용자가 클릭한 이후에만 재생되도록 함
       startScreen.style.display = 'none';
       gameOverScreen.style.display = 'none';
       gameRunning = true;
@@ -333,6 +332,10 @@
       finalTime.textContent = '생존 시간: ' + gameTime + '초';
       gameOverScreen.style.display = 'flex';
     }
+
+    window.onload = () => {
+      document.getElementById('bgm').play().catch(() => {});
+    };
   </script>
 </body>
 </html>
