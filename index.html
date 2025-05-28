@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>성 방어 게임</title>
   <style>
     body {
@@ -21,7 +21,6 @@
       height: 100%;
       object-fit: cover;
       z-index: 999;
-      background-color: black;
     }
 
     #game-container {
@@ -81,6 +80,16 @@
       z-index: 7;
     }
 
+    .blink {
+      animation: blink-animation 0.8s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+
     #health-bar, #score, #time {
       position: absolute;
       font-weight: bold;
@@ -90,8 +99,22 @@
       border-radius: 5px;
     }
 
-    #health-bar { top: 10px; left: 10px; width: 200px; height: 20px; background-color: #333; border: 2px solid #ddd; }
-    #health { height: 100%; width: 100%; background-color: #2ecc71; transition: width 0.3s; }
+    #health-bar {
+      top: 10px;
+      left: 10px;
+      width: 200px;
+      height: 20px;
+      background-color: #333;
+      border: 2px solid #ddd;
+    }
+
+    #health {
+      height: 100%;
+      width: 100%;
+      background-color: #2ecc71;
+      transition: width 0.3s;
+    }
+
     #time { top: 10px; right: 10px; }
     #score { top: 40px; left: 10px; }
 
@@ -127,24 +150,22 @@
 </head>
 <body>
 
-  <!-- 🎬 인트로 영상 -->
-  <video id="intro-video" autoplay muted>
-    <source src="video/intro.mp4" type="video/mp4">
+  <!-- 🎬 인트로 영상 (소리 포함) -->
+  <video id="intro-video" autoplay>
+    <source src="video/intro.mp4" type="video/mp4" />
     브라우저가 영상을 지원하지 않습니다.
   </video>
 
-  <!-- 🏰 게임 영역 -->
+  <!-- 🏰 게임 본체 -->
   <div id="game-container">
     <div id="player"></div>
     <div id="health-bar"><div id="health"></div></div>
     <div id="time">시간: 0초</div>
     <div id="score">점수: 0</div>
-
     <div id="start-screen">
       <h1>성 방어 게임</h1>
       <button id="start-button">게임 시작</button>
     </div>
-
     <div id="game-over" style="display:none">
       <h2>게임 오버</h2>
       <p id="final-score"></p>
@@ -152,11 +173,13 @@
     </div>
   </div>
 
-  <audio id="bgm" src="audio/bgm.mp3" loop autoplay></audio>
+  <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
   <script>
     const video = document.getElementById('intro-video');
     const gameContainer = document.getElementById('game-container');
+    const bgm = document.getElementById('bgm');
+
     const player = document.getElementById('player');
     const healthBar = document.getElementById('health');
     const timeDisplay = document.getElementById('time');
@@ -172,16 +195,17 @@
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
-    // ⏱ 영상 종료 후 게임 화면으로 전환
     video.onended = () => {
       video.style.display = 'none';
       gameContainer.style.display = 'block';
+      bgm.play().catch(() => {});
     };
 
     document.addEventListener('keydown', e => {
       keys[e.key] = true;
       if (e.key === ' ' && gameRunning) shoot();
     });
+
     document.addEventListener('keyup', e => { keys[e.key] = false; });
 
     startButton.onclick = () => {
@@ -238,7 +262,7 @@
       const types = ['ant', 'spider', 'moth', 'centipede'];
       const type = types[Math.floor(Math.random() * types.length)];
       const enemy = document.createElement('div');
-      enemy.className = 'enemy ' + type;
+      enemy.className = `enemy ${type} blink`;
       enemy.style.left = Math.random() * 550 + 'px';
       enemy.style.bottom = '950px';
       gameContainer.appendChild(enemy);
@@ -259,7 +283,7 @@
 
     function spawnFruit() {
       const fruit = document.createElement('div');
-      fruit.className = 'fruit';
+      fruit.className = 'fruit blink';
       fruit.style.left = Math.random() * 550 + 'px';
       fruit.style.bottom = '950px';
       gameContainer.appendChild(fruit);
@@ -305,12 +329,15 @@
     function updateHealth() {
       healthBar.style.width = playerHealth + '%';
     }
+
     function updateScore() {
       scoreDisplay.textContent = '점수: ' + score;
     }
+
     function updateTime() {
       timeDisplay.textContent = '시간: ' + gameTime + '초';
     }
+
     function damage(val) {
       playerHealth -= val;
       if (playerHealth <= 0) {
@@ -319,6 +346,7 @@
         updateHealth();
       }
     }
+
     function heal(val) {
       playerHealth = Math.min(100, playerHealth + val);
       updateHealth();
@@ -332,10 +360,6 @@
       finalTime.textContent = '생존 시간: ' + gameTime + '초';
       gameOverScreen.style.display = 'flex';
     }
-
-    window.onload = () => {
-      document.getElementById('bgm').play().catch(() => {});
-    };
   </script>
 </body>
 </html>
