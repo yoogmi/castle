@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>성 방어 게임</title>
   <style>
     body {
@@ -42,7 +43,6 @@
       background-repeat: no-repeat;
       background-color: transparent;
       animation: glow-yellow 1.2s infinite;
-      transform: translateZ(0);
     }
 
     .ant { background-image: url('images/ant.png'); }
@@ -54,9 +54,11 @@
       position: absolute;
       width: 5px;
       height: 10px;
-      background-color: yellow;
+      background-color: #ffff00;
       border-radius: 2px;
       z-index: 5;
+      animation: bullet-glow 0.8s infinite;
+      transform: translateZ(0);
     }
 
     .fruit {
@@ -69,7 +71,6 @@
       background-color: transparent;
       z-index: 7;
       animation: glow-gold 1.5s infinite;
-      transform: translateZ(0);
     }
 
     #health-bar, #score, #time {
@@ -88,8 +89,10 @@
 
     #start-screen, #game-over {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -109,16 +112,23 @@
       cursor: pointer;
     }
 
-    audio { display: none; }
+    audio {
+      display: none;
+    }
 
     @keyframes glow-yellow {
-      0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,150,0.2)); }
-      50% { filter: drop-shadow(0 0 12px rgba(255,255,150,0.8)); }
+      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 255, 100, 0.3)); }
+      50% { filter: drop-shadow(0 0 12px rgba(255, 255, 100, 0.8)); }
     }
 
     @keyframes glow-gold {
-      0%, 100% { filter: drop-shadow(0 0 0 rgba(255,215,0,0.2)); }
-      50% { filter: drop-shadow(0 0 15px rgba(255,215,0,0.9)); }
+      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.3)); }
+      50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9)); }
+    }
+
+    @keyframes bullet-glow {
+      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 255, 0, 0.3)); }
+      50% { filter: drop-shadow(0 0 10px rgba(255, 255, 0, 1)); }
     }
   </style>
 </head>
@@ -286,12 +296,15 @@
     function updateHealth() {
       healthBar.style.width = playerHealth + '%';
     }
+
     function updateScore() {
       scoreDisplay.textContent = '점수: ' + score;
     }
+
     function updateTime() {
       timeDisplay.textContent = '시간: ' + gameTime + '초';
     }
+
     function damage(val) {
       playerHealth -= val;
       if (playerHealth <= 0) {
@@ -300,6 +313,7 @@
         updateHealth();
       }
     }
+
     function heal(val) {
       playerHealth = Math.min(100, playerHealth + val);
       updateHealth();
