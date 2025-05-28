@@ -131,7 +131,7 @@
 <body>
 
   <!-- 🎬 인트로 영상 -->
-  <video id="intro-video" autoplay>
+  <video id="intro-video" autoplay muted playsinline>
     <source src="video/intro.mp4" type="video/mp4">
     브라우저가 영상을 지원하지 않습니다.
   </video>
@@ -196,8 +196,10 @@
       updateHealth(); updateScore(); updateTime();
       gameLoopInterval = setInterval(gameLoop, 20);
       timerInterval = setInterval(() => { gameTime++; updateTime(); }, 1000);
-      bgm.play().catch(() => {});
-    };
+      bgm.play().catch(() => {
+      console.log("음악 자동재생 실패 (사용자 상호작용 필요)");
+  });
+};
 
     function gameLoop() {
       movePlayer();
