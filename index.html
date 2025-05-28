@@ -1,9 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>성 방어 게임</title>
   <style>
     body {
@@ -20,7 +18,6 @@
       margin: 0 auto;
       background-image: url('images/background.png');
       background-size: cover;
-      background-position: center;
       border: 3px solid #333;
     }
 
@@ -42,23 +39,17 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-color: transparent;
-      animation: glow-yellow 1.2s infinite;
+      animation: flash 1s infinite;
     }
 
-    .ant { background-image: url('images/ant.png'); }
+    .ant    { background-image: url('images/ant.png'); }
     .spider { background-image: url('images/spider.png'); }
-    .moth { background-image: url('images/moth.png'); }
+    .moth   { background-image: url('images/moth.png'); }
     .centipede { background-image: url('images/centipede.png'); }
 
-    .bullet {
-      position: absolute;
-      width: 5px;
-      height: 10px;
-      background-color: #ffff00;
-      border-radius: 2px;
-      z-index: 5;
-      animation: bullet-glow 0.8s infinite;
-      transform: translateZ(0);
+    @keyframes flash {
+      0%, 100% { filter: brightness(1.2); }
+      50% { filter: brightness(2.5); }
     }
 
     .fruit {
@@ -70,7 +61,22 @@
       background-repeat: no-repeat;
       background-color: transparent;
       z-index: 7;
-      animation: glow-gold 1.5s infinite;
+      animation: glow 1.2s infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { filter: drop-shadow(0 0 5px gold); }
+      50% { filter: drop-shadow(0 0 15px gold); }
+    }
+
+    .bullet {
+      position: absolute;
+      width: 6px;
+      height: 12px;
+      background-color: yellow;
+      border-radius: 3px;
+      box-shadow: 0 0 8px #ffff00;
+      z-index: 5;
     }
 
     #health-bar, #score, #time {
@@ -82,17 +88,15 @@
       border-radius: 5px;
     }
 
-    #health-bar { top: 10px; left: 10px; width: 200px; height: 20px; background-color: #333; border: 2px solid #ddd; }
+    #health-bar { top: 10px; left: 10px; width: 200px; height: 20px; border: 2px solid #ddd; }
     #health { height: 100%; width: 100%; background-color: #2ecc71; transition: width 0.3s; }
     #time { top: 10px; right: 10px; }
     #score { top: 40px; left: 10px; }
 
     #start-screen, #game-over {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -112,23 +116,18 @@
       cursor: pointer;
     }
 
-    audio {
-      display: none;
-    }
-
-    @keyframes glow-yellow {
-      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 255, 100, 0.3)); }
-      50% { filter: drop-shadow(0 0 12px rgba(255, 255, 100, 0.8)); }
-    }
-
-    @keyframes glow-gold {
-      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.3)); }
-      50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9)); }
-    }
-
-    @keyframes bullet-glow {
-      0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 255, 0, 0.3)); }
-      50% { filter: drop-shadow(0 0 10px rgba(255, 255, 0, 1)); }
+    #feedback {
+      position: absolute;
+      top: 45%;
+      width: 100%;
+      text-align: center;
+      font-size: 36px;
+      font-weight: bold;
+      color: gold;
+      text-shadow: 0 0 10px yellow;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 99;
     }
   </style>
 </head>
@@ -138,6 +137,7 @@
     <div id="health-bar"><div id="health"></div></div>
     <div id="time">시간: 0초</div>
     <div id="score">점수: 0</div>
+    <div id="feedback"></div>
     <div id="start-screen">
       <h1>성 방어 게임</h1>
       <button id="start-button">게임 시작</button>
@@ -161,9 +161,10 @@
     const gameOverScreen = document.getElementById('game-over');
     const finalScore = document.getElementById('final-score');
     const finalTime = document.getElementById('final-time');
+    const feedback = document.getElementById('feedback');
 
     let playerX = 275, playerY = 100, moveSpeed = 5;
-    let playerHealth = 100, gameTime = 0, score = 0;
+    let playerHealth = 100, gameTime = 0, score = 0, killCount = 0;
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
@@ -177,7 +178,7 @@
       startScreen.style.display = 'none';
       gameOverScreen.style.display = 'none';
       gameRunning = true;
-      playerHealth = 100; score = 0; gameTime = 0;
+      playerHealth = 100; score = 0; gameTime = 0; killCount = 0;
       bullets = []; enemies = []; fruits = [];
       updateHealth(); updateScore(); updateTime();
       gameLoopInterval = setInterval(gameLoop, 20);
@@ -200,7 +201,6 @@
       if (keys['ArrowRight']) playerX += moveSpeed;
       if (keys['ArrowUp']) playerY += moveSpeed;
       if (keys['ArrowDown']) playerY -= moveSpeed;
-
       player.style.left = playerX + 'px';
       player.style.bottom = playerY + 'px';
     }
@@ -278,7 +278,10 @@
             if (e.health <= 0) {
               gameContainer.removeChild(e.el);
               enemies.splice(ei, 1);
-              score += 10; updateScore();
+              score += 10;
+              killCount++;
+              updateScore();
+              showEncouragement();
             }
           }
         });
@@ -293,25 +296,23 @@
       });
     }
 
-    function updateHealth() {
-      healthBar.style.width = playerHealth + '%';
+    function showEncouragement() {
+      if (killCount > 0 && killCount % 10 === 0) {
+        const messages = ['Great!', 'Excellent!', 'Good job!'];
+        feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
+        feedback.style.opacity = 1;
+        setTimeout(() => { feedback.style.opacity = 0; }, 1500);
+      }
     }
 
-    function updateScore() {
-      scoreDisplay.textContent = '점수: ' + score;
-    }
-
-    function updateTime() {
-      timeDisplay.textContent = '시간: ' + gameTime + '초';
-    }
+    function updateHealth() { healthBar.style.width = playerHealth + '%'; }
+    function updateScore() { scoreDisplay.textContent = '점수: ' + score; }
+    function updateTime() { timeDisplay.textContent = '시간: ' + gameTime + '초'; }
 
     function damage(val) {
       playerHealth -= val;
-      if (playerHealth <= 0) {
-        endGame();
-      } else {
-        updateHealth();
-      }
+      if (playerHealth <= 0) endGame();
+      else updateHealth();
     }
 
     function heal(val) {
