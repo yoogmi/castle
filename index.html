@@ -2,26 +2,25 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>성 방어 게임</title>
+  <title>행운왕국지키기</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
       font-family: Arial, sans-serif;
       background-color: black;
+      overflow: hidden;
     }
 
+    /* 🎬 인트로 영상 */
     #intro-video {
       position: fixed;
-      top: 0;
-      left: 0;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      z-index: 999;
+      z-index: 1000;
     }
 
+    /* 🏰 게임 영역 */
     #game-container {
       position: relative;
       width: 600px;
@@ -40,7 +39,6 @@
       background-image: url('images/player.png');
       background-size: contain;
       background-repeat: no-repeat;
-      background-color: transparent;
       z-index: 10;
     }
 
@@ -50,19 +48,13 @@
       height: 80px;
       background-size: contain;
       background-repeat: no-repeat;
-      background-color: transparent;
-      animation: flash 1s infinite;
+      animation: flash 1.2s infinite;
     }
 
     .ant { background-image: url('images/ant.png'); }
     .spider { background-image: url('images/spider.png'); }
     .moth { background-image: url('images/moth.png'); }
     .centipede { background-image: url('images/centipede.png'); }
-
-    @keyframes flash {
-      0%, 100% { filter: brightness(1.2); }
-      50% { filter: brightness(2.5); }
-    }
 
     .fruit {
       position: absolute;
@@ -71,9 +63,12 @@
       background-image: url('images/fruit.png');
       background-size: contain;
       background-repeat: no-repeat;
-      background-color: transparent;
-      z-index: 7;
-      animation: glow 1.2s infinite;
+      animation: glow 1.5s infinite;
+    }
+
+    @keyframes flash {
+      0%, 100% { filter: drop-shadow(0 0 5px yellow); }
+      50% { filter: drop-shadow(0 0 15px yellow); }
     }
 
     @keyframes glow {
@@ -128,20 +123,6 @@
       cursor: pointer;
     }
 
-    #feedback {
-      position: absolute;
-      top: 45%;
-      width: 100%;
-      text-align: center;
-      font-size: 36px;
-      font-weight: bold;
-      color: gold;
-      text-shadow: 0 0 10px yellow;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 99;
-    }
-
     audio {
       display: none;
     }
@@ -152,20 +133,21 @@
   <!-- 🎬 인트로 영상 -->
   <video id="intro-video" autoplay>
     <source src="video/intro.mp4" type="video/mp4">
-    브라우저가 동영상을 지원하지 않습니다.
+    브라우저가 영상을 지원하지 않습니다.
   </video>
 
-  <!-- 🏰 게임 화면 -->
+  <!-- 🏰 게임 영역 -->
   <div id="game-container">
     <div id="player"></div>
     <div id="health-bar"><div id="health"></div></div>
     <div id="time">시간: 0초</div>
     <div id="score">점수: 0</div>
-    <div id="feedback"></div>
+
     <div id="start-screen">
-      <h1>성 방어 게임</h1>
+      <h1>행운왕국지키기</h1>
       <button id="start-button">게임 시작</button>
     </div>
+
     <div id="game-over" style="display:none">
       <h2>게임 오버</h2>
       <p id="final-score"></p>
@@ -173,12 +155,12 @@
     </div>
   </div>
 
-  <!-- 🎵 게임 플레이 배경음악 -->
   <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
   <script>
     const video = document.getElementById('intro-video');
     const gameContainer = document.getElementById('game-container');
+    const bgm = document.getElementById('bgm');
     const player = document.getElementById('player');
     const healthBar = document.getElementById('health');
     const timeDisplay = document.getElementById('time');
@@ -188,19 +170,15 @@
     const gameOverScreen = document.getElementById('game-over');
     const finalScore = document.getElementById('final-score');
     const finalTime = document.getElementById('final-time');
-    const feedback = document.getElementById('feedback');
-    const bgm = document.getElementById('bgm');
 
     let playerX = 275, playerY = 100, moveSpeed = 5;
-    let playerHealth = 100, gameTime = 0, score = 0, killCount = 0;
+    let playerHealth = 100, gameTime = 0, score = 0;
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
-    // 🎥 영상 끝나면 게임 화면 표시 & BGM 재생
     video.onended = () => {
       video.style.display = 'none';
       gameContainer.style.display = 'block';
-      bgm.play().catch(() => {});
     };
 
     document.addEventListener('keydown', e => {
@@ -213,11 +191,12 @@
       startScreen.style.display = 'none';
       gameOverScreen.style.display = 'none';
       gameRunning = true;
-      playerHealth = 100; score = 0; gameTime = 0; killCount = 0;
+      playerHealth = 100; score = 0; gameTime = 0;
       bullets = []; enemies = []; fruits = [];
       updateHealth(); updateScore(); updateTime();
       gameLoopInterval = setInterval(gameLoop, 20);
       timerInterval = setInterval(() => { gameTime++; updateTime(); }, 1000);
+      bgm.play().catch(() => {});
     };
 
     function gameLoop() {
@@ -226,7 +205,6 @@
       updateEnemies();
       updateFruits();
       checkCollisions();
-
       if (Math.random() < 0.004) spawnEnemy();
       if (Math.random() < 0.0025) spawnFruit();
     }
@@ -314,9 +292,7 @@
               gameContainer.removeChild(e.el);
               enemies.splice(ei, 1);
               score += 10;
-              killCount++;
               updateScore();
-              showEncouragement();
             }
           }
         });
@@ -329,15 +305,6 @@
           heal(10);
         }
       });
-    }
-
-    function showEncouragement() {
-      if (killCount > 0 && killCount % 10 === 0) {
-        const messages = ['Great!', 'Excellent!', 'Good job!'];
-        feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
-        feedback.style.opacity = 1;
-        setTimeout(() => { feedback.style.opacity = 0; }, 1500);
-      }
     }
 
     function updateHealth() { healthBar.style.width = playerHealth + '%'; }
