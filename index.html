@@ -152,7 +152,7 @@
 
   <!-- 🎬 인트로 영상 영역 -->
   <div id="intro-container">
-    <video id="intro-video" autoplay playsinline>
+    <video id="intro-video" autoplay muted playsinline>
       <source src="video/intro.mp4" type="video/mp4">
       브라우저가 영상을 지원하지 않습니다.
     </video>
@@ -201,16 +201,13 @@
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
-const startGame = () => {
-  video.muted = false; // 🔊 인트로 영상 음소거 해제
-  video.play().catch(() => {}); // 🔁 영상 재생 다시 시도 (브라우저 보안대응)
-  introContainer.style.display = 'none';
-  gameContainer.style.display = 'block';
-  bgm.play().catch(() => {}); // 🎵 게임 배경음악 재생
-};
+    const startGame = () => {
+      introContainer.style.display = 'none';
+      gameContainer.style.display = 'block';
+    };
 
-video.onended = startGame;
-skipButton.onclick = startGame;
+    video.onended = startGame;
+    skipButton.onclick = startGame;
 
     document.addEventListener('keydown', e => {
       keys[e.key] = true;
