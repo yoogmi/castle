@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>성 방어 게임</title>
   <style>
     body {
@@ -24,24 +24,24 @@
     }
 
     #player {
-  position: absolute;
-  width: 100px;
-  height: 120px;
-  background-image: url('images/player.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  z-index: 10;
-}
+      position: absolute;
+      width: 100px;
+      height: 120px;
+      background-image: url('images/player.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-color: transparent;
+      z-index: 10;
+    }
 
     .enemy {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-color: transparent;
-}
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-color: transparent;
+    }
 
     .ant { background-image: url('images/ant.png'); }
     .spider { background-image: url('images/spider.png'); }
@@ -58,15 +58,15 @@
     }
 
     .fruit {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background-image: url('images/fruit.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  z-index: 7;
-}
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-image: url('images/fruit.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-color: transparent;
+      z-index: 7;
+    }
 
     #health-bar, #score, #time {
       position: absolute;
@@ -109,6 +109,30 @@
 
     audio {
       display: none;
+    }
+
+    /* 번쩍이는 효과 */
+    @keyframes glow-yellow {
+      0% { filter: drop-shadow(0 0 0px rgba(255, 255, 100, 0.3)); }
+      50% { filter: drop-shadow(0 0 12px rgba(255, 255, 100, 0.8)); }
+      100% { filter: drop-shadow(0 0 0px rgba(255, 255, 100, 0.3)); }
+    }
+
+    @keyframes glow-gold {
+      0% { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.3)); }
+      50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9)); }
+      100% { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.3)); }
+    }
+
+    .enemy.ant,
+    .enemy.spider,
+    .enemy.moth,
+    .enemy.centipede {
+      animation: glow-yellow 1.2s infinite;
+    }
+
+    .fruit {
+      animation: glow-gold 1.5s infinite;
     }
   </style>
 </head>
