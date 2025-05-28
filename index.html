@@ -11,16 +11,36 @@
       overflow: hidden;
     }
 
-    /* 🎬 인트로 영상 */
-    #intro-video {
+    #intro-container {
       position: fixed;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
       z-index: 1000;
     }
 
-    /* 🏰 게임 영역 */
+    #intro-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #skip-button {
+      position: absolute;
+      bottom: 30px;
+      padding: 15px 25px;
+      font-size: 18px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
     #game-container {
       position: relative;
       width: 600px;
@@ -51,10 +71,10 @@
       animation: flash 1.2s infinite;
     }
 
-    .ant { background-image: url('images/ant.png'); }
-    .spider { background-image: url('images/spider.png'); }
-    .moth { background-image: url('images/moth.png'); }
-    .centipede { background-image: url('images/centipede.png'); }
+    .ant        { background-image: url('images/ant.png'); }
+    .spider     { background-image: url('images/spider.png'); }
+    .moth       { background-image: url('images/moth.png'); }
+    .centipede  { background-image: url('images/centipede.png'); }
 
     .fruit {
       position: absolute;
@@ -68,12 +88,12 @@
 
     @keyframes flash {
       0%, 100% { filter: drop-shadow(0 0 5px yellow); }
-      50% { filter: drop-shadow(0 0 15px yellow); }
+      50%      { filter: drop-shadow(0 0 15px yellow); }
     }
 
     @keyframes glow {
       0%, 100% { filter: drop-shadow(0 0 5px gold); }
-      50% { filter: drop-shadow(0 0 15px gold); }
+      50%      { filter: drop-shadow(0 0 15px gold); }
     }
 
     .bullet {
@@ -97,8 +117,8 @@
 
     #health-bar { top: 10px; left: 10px; width: 200px; height: 20px; border: 2px solid #ddd; }
     #health { height: 100%; width: 100%; background-color: #2ecc71; transition: width 0.3s; }
-    #time { top: 10px; right: 10px; }
-    #score { top: 40px; left: 10px; }
+    #time   { top: 10px; right: 10px; }
+    #score  { top: 40px; left: 10px; }
 
     #start-screen, #game-over {
       position: absolute;
@@ -130,11 +150,14 @@
 </head>
 <body>
 
-  <!-- 🎬 인트로 영상 -->
-  <video id="intro-video" autoplay muted playsinline>
-    <source src="video/intro.mp4" type="video/mp4">
-    브라우저가 영상을 지원하지 않습니다.
-  </video>
+  <!-- 🎬 인트로 영상 영역 -->
+  <div id="intro-container">
+    <video id="intro-video" autoplay muted playsinline>
+      <source src="video/intro.mp4" type="video/mp4">
+      브라우저가 영상을 지원하지 않습니다.
+    </video>
+    <button id="skip-button">게임 시작</button>
+  </div>
 
   <!-- 🏰 게임 영역 -->
   <div id="game-container">
@@ -158,28 +181,33 @@
   <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
   <script>
+    const introContainer = document.getElementById('intro-container');
     const video = document.getElementById('intro-video');
+    const skipButton = document.getElementById('skip-button');
     const gameContainer = document.getElementById('game-container');
     const bgm = document.getElementById('bgm');
-    const player = document.getElementById('player');
-    const healthBar = document.getElementById('health');
-    const timeDisplay = document.getElementById('time');
-    const scoreDisplay = document.getElementById('score');
     const startScreen = document.getElementById('start-screen');
     const startButton = document.getElementById('start-button');
     const gameOverScreen = document.getElementById('game-over');
     const finalScore = document.getElementById('final-score');
     const finalTime = document.getElementById('final-time');
+    const player = document.getElementById('player');
+    const healthBar = document.getElementById('health');
+    const timeDisplay = document.getElementById('time');
+    const scoreDisplay = document.getElementById('score');
 
     let playerX = 275, playerY = 100, moveSpeed = 5;
     let playerHealth = 100, gameTime = 0, score = 0;
     let gameRunning = false, bullets = [], enemies = [], fruits = [], keys = {};
     let gameLoopInterval, timerInterval;
 
-    video.onended = () => {
-      video.style.display = 'none';
+    const startGame = () => {
+      introContainer.style.display = 'none';
       gameContainer.style.display = 'block';
     };
+
+    video.onended = startGame;
+    skipButton.onclick = startGame;
 
     document.addEventListener('keydown', e => {
       keys[e.key] = true;
@@ -196,10 +224,8 @@
       updateHealth(); updateScore(); updateTime();
       gameLoopInterval = setInterval(gameLoop, 20);
       timerInterval = setInterval(() => { gameTime++; updateTime(); }, 1000);
-      bgm.play().catch(() => {
-      console.log("음악 자동재생 실패 (사용자 상호작용 필요)");
-  });
-};
+      bgm.play().catch(() => {});
+    };
 
     function gameLoop() {
       movePlayer();
